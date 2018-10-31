@@ -428,8 +428,11 @@ class StandardMzml(object):
                     if target_index < self.seek_list[0][0] or target_index > self.seek_list[-1][0]:
                         raise Exception(
                             'Spectrum ID should be between'
-                            ' {0} and'.format(self.seek_list[0][0])
-                            ' {self.seek_list[-1][0]}'
+                            ' {0} and {1}'.format(
+                                self.seek_list[0][0],
+                                self.seek_list[-1][0]
+                            )
+
                         )
 
                     element_before = self.seek_list[insert_position - 1]

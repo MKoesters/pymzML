@@ -56,16 +56,16 @@ class StandardMzml(object):
         self.offset_dict = dict()
         self.spec_open = regex_patterns.SPECTRUM_OPEN_PATTERN
         self.spec_close = regex_patterns.SPECTRUM_CLOSE_PATTERN
-        self.offset_dict = {}
         self.seek_list = self._read_extremes()
-        # if len(self.seek_list) > 1:
-        #     self._average_bytes_per_spec = round(
-        #         int(
-        #             self.seek_list[-1][1] / (self.seek_list[-1][0] - self.seek_list[0][0])
-        #         )
-        #     )
-        # else:
-        #     self._average_bytes_per_spec = self.seek_list[-1][1]
+        self.offset_dict = dict(self.seek_list)
+        if len(self.seek_list) > 1:
+            self._average_bytes_per_spec = round(
+                int(
+                    self.seek_list[-1][1] / (self.seek_list[-1][0] - self.seek_list[0][0])
+                )
+            )
+        else:
+            self._average_bytes_per_spec = self.seek_list[-1][1]
 
         if build_index_from_scratch is True:
             seeker = self.get_binary_file_handler()

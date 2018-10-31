@@ -333,6 +333,12 @@ class StandardMzml(object):
         return
 
     def _read_extremes(self):
+        """
+        Read min and max spectrum ids. Required for binary jumps.
+
+        Returns:
+            seek_list (list): list of tuples containing spec_id and file_offset
+        """
         chunk_size = 128000
         first_scan = None
         last_scan = None
@@ -377,7 +383,6 @@ class StandardMzml(object):
                 # match = list(self.regex['spec_title_pattern'].finditer(buffer))
 
                 matches = list(regex_patterns.SPECTRUM_OPEN_PATTERN.finditer(buffer))
-                print(f'{x}', end='\r')
                 if len(matches) != 0:
                     last_scan = int(
                         re.search(
@@ -395,6 +400,17 @@ class StandardMzml(object):
         return seek_list
 
     def _binary_search(self, target_index):
+        """
+        Retrieve spectrum for a given spectrum ID using binary jumps
+
+        Args:
+            target_index (int): native id of the spectrum to access
+
+        Returns:
+            Spectrum (pymzml.spec.Spectrum): pymzML spectrum
+
+
+        """
         chunk_size = 12800
         offset_scale = 1
         # This will be used if no spec was found at all during a jump
@@ -411,9 +427,9 @@ class StandardMzml(object):
 
                     if target_index < self.seek_list[0][0] or target_index > self.seek_list[-1][0]:
                         raise Exception(
-                            f'Spectrum ID should be between'
-                            f' {self.seek_list[0][0]} and'
-                            f' {self.seek_list[-1][0]}'
+                            'Spectrum ID should be between'
+                            ' {0} and'.format(self.seek_list[0][0])
+                            ' {self.seek_list[-1][0]}'
                         )
 
                     element_before = self.seek_list[insert_position - 1]

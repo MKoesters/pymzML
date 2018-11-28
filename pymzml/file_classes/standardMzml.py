@@ -58,14 +58,14 @@ class StandardMzml(object):
         self.spec_close = regex_patterns.SPECTRUM_CLOSE_PATTERN
         self.offset_dict = {}
         self.seek_list = self._read_extremes()
-        if len(self.seek_list) > 1:
-            self._average_bytes_per_spec = round(
-                int(
-                    self.seek_list[-1][1] / (self.seek_list[-1][0] - self.seek_list[0][0])
-                )
-            )
-        else:
-            self._average_bytes_per_spec = self.seek_list[-1][1]
+        # if len(self.seek_list) > 1:
+        #     self._average_bytes_per_spec = round(
+        #         int(
+        #             self.seek_list[-1][1] / (self.seek_list[-1][0] - self.seek_list[0][0])
+        #         )
+        #     )
+        # else:
+        #     self._average_bytes_per_spec = self.seek_list[-1][1]
 
         if build_index_from_scratch is True:
             seeker = self.get_binary_file_handler()
@@ -340,6 +340,7 @@ class StandardMzml(object):
             seek_list (list): list of tuples containing spec_id and file_offset
         """
         chunk_size = 128000
+        # chunk_size = 12800
         first_scan = None
         last_scan = None
         seek_list = []
@@ -352,16 +353,16 @@ class StandardMzml(object):
                     break
                 chunk = seeker.read(chunk_size)
                 buffer += chunk
-                match = regex_patterns.SPECTRUM_OPEN_PATTERN.search(buffer)
+                match = regex_patterns.SPECTRUM_OPEN_PATTERN_SIMPLE.search(buffer)
                 if match is not None:
+                    id_match = regex_patterns.SPECTRUM_ID_PATTERN_SIMPLE.search(buffer)
                     first_scan = int(
                         re.search(
                             b'[0-9]*$',
-                            match.group('id')
+                            id_match.group('id')
                         ).group()
                     )
                     #
-                    # breakpoint()
                     seek_list.append(
                         (
                             first_scan,
@@ -371,7 +372,7 @@ class StandardMzml(object):
                     break
             buffer = b''
             seeker.seek(0, os.SEEK_END)
-            for x in range(1, 500):
+            for x in range(1, 100):
                 try:
                     seeker.seek(
                         -x * chunk_size, os.SEEK_END
@@ -382,12 +383,13 @@ class StandardMzml(object):
                 buffer = chunk + buffer
                 # match = list(self.regex['spec_title_pattern'].finditer(buffer))
 
-                matches = list(regex_patterns.SPECTRUM_OPEN_PATTERN.finditer(buffer))
+                matches = list(regex_patterns.SPECTRUM_OPEN_PATTERN_SIMPLE.finditer(buffer))
                 if len(matches) != 0:
+                    id_match = regex_patterns.SPECTRUM_ID_PATTERN_SIMPLE.search(buffer[matches[-1].start():])
                     last_scan = int(
                         re.search(
                             b'[0-9]*$',
-                            matches[-1].group('id')
+                            id_match.group('id')
                         ).group()
                     )
                     seek_list.append(

@@ -41,13 +41,13 @@ class StandardMzmlTest(unittest.TestCase):
         self.assertIsInstance(chrom, Chromatogram)
         self.assertEqual(ID, chrom.ID)
 
-    @given(integers(min_value=1, max_value=10))
-    def test_interpol_search(self, choice):
-        """
-        """
-        spec = self.standard_mzml._interpol_search(choice)
-        self.assertIsInstance(spec, Spectrum)
-        self.assertEqual(spec.ID, choice)
+    # @given(integers(min_value=1, max_value=10))
+    # def test_interpol_search(self, choice):
+    #     """
+    #     """
+    #     spec = self.standard_mzml._interpol_search(choice)
+    #     self.assertIsInstance(spec, Spectrum)
+    #     self.assertEqual(spec.ID, choice)
 
     @given(integers(min_value=1, max_value=10))
     def test_binary_search(self, choice):

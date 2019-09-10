@@ -39,13 +39,13 @@ Regex to catch moby dick chapter number used in the index gezip writer example.
 """
 
 SPECTRUM_OPEN_PATTERN = re.compile(
-    b'<*spectrum[^>]*index="(?P<index>[0-9]+)" id="(?P<id>[^"]+)" defaultArrayLength="[0-9]+">'
+    b'<spectrum[^>]*index="(?P<index>[0-9]+)" id="(?P<id>[^"]+)" defaultArrayLength="[0-9]+">'
 )
 """
 Regex to catch specturm open xml tag with encoded array length
 """
 
-SPECTRUM_OPEN_PATTERN_SIMPLE = re.compile(rb"<spectrum")
+SPECTRUM_OPEN_PATTERN_SIMPLE = re.compile(rb"<spectrum ")
 SPECTRUM_ID_PATTERN_SIMPLE = re.compile(rb"<*spectrum[^>]*id=\"(?P<id>[^\"]+)\"")
 SPECTRUM_DEFAULTARRY_PATTERN_SIMPLE = re.compile(rb"<*spectrum[^>]*defaultArrayLength=\"[0-9]+\">")
 

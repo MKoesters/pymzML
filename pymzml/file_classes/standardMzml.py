@@ -64,9 +64,13 @@ class StandardMzml(object):
                     self.seek_list[-1][1] / (self.seek_list[-1][0] - self.seek_list[0][0])
                 )
             )
-        else:
+        elif len(self.seek_list) == 1:
+            print(self.seek_list)
             self._average_bytes_per_spec = self.seek_list[-1][1]
+        else:
+            self._average_bytes_per_spec = 100
 
+        self._build_index()
         if build_index_from_scratch is True:
             seeker = self.get_binary_file_handler()
             self._build_index_from_scratch(seeker)
@@ -115,13 +119,15 @@ class StandardMzml(object):
                     raise StopIteration
 
         elif identifier in self.offset_dict.keys():
-
+            print('from dict')
             start = self.offset_dict[identifier]
             with self.get_binary_file_handler() as seeker:
-                seeker.seek(start[0])
+                if isinstance(start, tuple):
+                    start = start[0]
+                seeker.seek(start)
                 start, end = self._read_to_spec_end(seeker)
             self.file_handler.seek(start, 0)
-            data = self.file_handler.read(end - start)
+            data = self.file_handler.read(end)
             if data.startswith("<spectrum"):
                 spectrum = spec.Spectrum(XML(data), measured_precision=5e-6)
             elif data.startswith("<chromatogram"):
@@ -129,8 +135,8 @@ class StandardMzml(object):
         elif type(identifier) == str:
             return self._search_string_identifier(identifier)
         else:
+            print('binary')
             spectrum = self._binary_search(identifier)
-
         return spectrum
 
     def _build_index(self, from_scratch=False):
@@ -229,7 +235,7 @@ class StandardMzml(object):
                         # match is None and has no attribute group,
                         # so use the whole string as ID
                         pass
-                    self.offset_dict[native_id] = (offset,)
+                    self.offset_dict[native_id] = offset
         seeker.close()
 
     def _build_index_from_scratch(self, seeker):
@@ -436,7 +442,6 @@ class StandardMzml(object):
                             )
 
                         )
-
                     element_before = self.seek_list[insert_position - 1]
                     spec_offset_m1 = target_index - element_before[0]
 
@@ -447,15 +452,18 @@ class StandardMzml(object):
                     scan_diff_m1_p1 = element_after[0] - element_before[0]
 
                     average_spec_between_m1_p1 =  int(round(byte_diff_m1_p1 / scan_diff_m1_p1))
-
+                    # print(f'Offset {offset_scale}')
                     if spec_offset_m1 < spec_offset_p1:
                         byte_offset = element_before[1] + offset_scale * (average_spec_between_m1_p1 * spec_offset_m1)
                     else:
                         byte_offset = element_after[1] - offset_scale * (average_spec_between_m1_p1 * spec_offset_p1)
 
                     found_scan = False
+                    print(element_before, element_after)
                     for x in range(100):
-                        seeker.seek(os.SEEK_SET + byte_offset + x * chunk_size)
+                    # for x in range(-50, 50):
+                        # print(max([os.SEEK_SET + byte_offset + x * chunk_size, 1]))
+                        seeker.seek(max([os.SEEK_SET + byte_offset + x * chunk_size, 1]))
                         chunk = seeker.read(chunk_size)
                         match = regex_patterns.SPECTRUM_OPEN_PATTERN.search(chunk)
                         if match is not None:
@@ -478,7 +486,11 @@ class StandardMzml(object):
                             self.seek_list.insert(new_pos, new_entry)
                             self.offset_dict[scan] = \
                                 seeker.tell() - chunk_size + match.start()
-
+                            # seeker.seek(self.offset_dict[scan])
+                            # t = seeker.read(100)
+                            # if not t.startswith(b'<'):
+                            #     breakpoint()
+                            # print(f"Added {scan} to dict.")
                             if int(scan) == int(target_index):
                                 # maybe jump from other boarder
                                 break
@@ -490,7 +502,10 @@ class StandardMzml(object):
                     if int(scan) == int(target_index):
                         break
 
+            # if target_index not in self.offset_dict:
+            #     breakpoint()
             start = self.offset_dict[target_index]
+            # print(start)
             seeker.seek(start)
             match = None
             data = b''
@@ -640,21 +655,24 @@ class StandardMzml(object):
         end_found = False
         start_pos = seeker.tell()
         data_chunk = seeker.read(chunk_size)
+        # breakpoint()
         while end_found is False:
             chunk_offset = seeker.tell()
-            data_chunk = seeker.read(chunk_size)
+            data_chunk += seeker.read(chunk_size)
             tag_end, seeker = self._read_until_tag_end(seeker)
             data_chunk += tag_end
             if regex_patterns.SPECTRUM_CLOSE_PATTERN.search(data_chunk):
                 match = regex_patterns.SPECTRUM_CLOSE_PATTERN.search(data_chunk)
                 relative_pos_in_chunk = match.end()
                 end_pos = chunk_offset + relative_pos_in_chunk
+                end_pos = match.end()
                 end_found = True
             elif regex_patterns.CHROMATOGRAM_CLOSE_PATTERN.search(data_chunk):
                 match = regex_patterns.CHROMATOGRAM_CLOSE_PATTERN.search(data_chunk)
                 relative_pos_in_chunk = match.end()
                 end_pos = chunk_offset + relative_pos_in_chunk
                 end_found = True
+        # breakpoint()
         return (start_pos, end_pos)
 
     def _search_linear(self, seeker, index, chunk_size=8):
@@ -747,7 +765,7 @@ class StandardMzml(object):
                         seeker.seek(spec_start_offset)
                         start, end = self._read_to_spec_end(seeker)
                         seeker.seek(start)
-                        spec_string = seeker.read(end - start)
+                        spec_string = seeker.read(end)
                         xml_string = XML(spec_string)
                         return spec.Spectrum(xml_string, measured_precision=5e-6)
                 elif chrom_start:

@@ -1362,6 +1362,9 @@ class Spectrum(MS_Spectrum):
             self._centroided_peaks_sorted_by_i = self.peaks("centroided")[
                 self.peaks("centroided")[:, 1].argsort()
             ]
+            # self._centroided_peaks_sorted_by_i = np.sort(
+            #     self.peaks("centroided"), axis=1
+            # )
         return self._centroided_peaks_sorted_by_i[-n:]
 
     def ppm2abs(self, value, ppm_value, direction=1, factor=1):

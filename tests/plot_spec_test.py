@@ -170,6 +170,8 @@ class PlotTest(unittest.TestCase):
                     plot_num=plotnumber,
                     mz_range=mz_range,
                 )
+                self.pf.save('test.html')
+                breakpoint()
 
             self.assertEqual(
                 self.pf.plots[plotnumber][-1]["line"]["color"],

@@ -234,9 +234,9 @@ class Factory(object):
                 filling = "tozeroy"
                 for x in data:
                     y_pos = x[1]
-                    x_values += x[0], x[0], x[0], None
-                    y_values += 0.0, y_pos, 0.0, None
-                    txt += None, x[2], None, None
+                    x_values.append(x[0])
+                    y_values.append(y_pos)
+                    txt.append(x[2])
 
             elif style[1] == "triangle":
                 if not pos:
@@ -257,33 +257,34 @@ class Factory(object):
                 for x in data:
                     x_max = self.x_max[plot_num]
                     y_max = x[1]
-                    y_values += 0.0, y_max, 0.0, None
-                    txt += None, x[2], None, None
+                    y_values.append(y_max)
+                    txt.append(x[2])
 
-                    if pos == "MS_precision":
-                        x_values += (
-                            x[0] - (x[0] * MS_precision),
-                            x[0],
-                            x[0] + (x[0] * MS_precision),
-                            None,
-                        )
-                        continue
-                    elif pos == "micro":
-                        rel_width = 1 / float(10000)
-                    elif pos == "tiny":
-                        rel_width = 1 / float(2000)
-                    elif pos == "small":
-                        rel_width = 1 / float(200)
-                    elif pos == "medium":
-                        rel_width = 1 / float(100)
-                    elif pos == "big":
-                        rel_width = 1 / float(50)
-                    x_values += (
-                        x[0] - (x_max * rel_width),
-                        x[0],
-                        x[0] + (x_max * rel_width),
-                        None,
-                    )
+                    # if pos == "MS_precision":
+                    #     x_values += (
+                    #         x[0] - (x[0] * MS_precision),
+                    #         x[0],
+                    #         x[0] + (x[0] * MS_precision),
+                    #         None,
+                    #     )
+                    #     continue
+                    # elif pos == "micro":
+                    #     rel_width = 1 / float(10000)
+                    # elif pos == "tiny":
+                    #     rel_width = 1 / float(2000)
+                    # elif pos == "small":
+                    #     rel_width = 1 / float(200)
+                    # elif pos == "medium":
+                    #     rel_width = 1 / float(100)
+                    # elif pos == "big":
+                    #     rel_width = 1 / float(50)
+                    # x_values += (
+                    #     x[0] - (x_max * rel_width),
+                    #     x[0],
+                    #     x[0] + (x_max * rel_width),
+                    #     None,
+                    # )
+                    x_values.append(x[0])
 
             elif style[1] == "spline":
                 mode = "lines+markers+text"
@@ -318,9 +319,9 @@ class Factory(object):
                         y_pos = 0.0
                         offset = "-__splineOffset__0"
 
-                    x_values += x[0], (x[0] + x[1]) / 2, x[1], None
-                    y_values += y_pos, str(offset), y_pos, None
-                    txt += None, x[3], None, None
+                    x_values += x[0], (x[0] + x[1]) / 2, x[1]
+                    y_values += y_pos, str(offset), y_pos
+                    txt += None, x[3], None
 
             elif style[1] == "linear":
                 shape = "linear"
@@ -409,8 +410,8 @@ class Factory(object):
                 filling = "tozeroy"
                 for x in zip(x_vals, y_vals):
                     y_pos = x[1]
-                    x_values += x[0], x[0], x[0], None
-                    y_values += 0.0, y_pos, 0.0, None
+                    x_values.append(x[0])
+                    y_values.append(y_pos)
 
             elif style[0] == "triangle":
                 if len(style) == 2:
@@ -432,15 +433,9 @@ class Factory(object):
                 for x in zip(x_vals, y_vals):
                     x_max = self.x_max[plot_num]
                     y_pos = x[1]
-                    y_values += 0.0, y_pos, 0.0, None
+                    y_values.append(y_pos)
                     if pos == "MS_precision":
-                        x_values += (
-                            x[0] - (x[0] * MS_precision),
-                            x[0],
-                            x[0] + (x[0] * MS_precision),
-                            None,
-                        )
-                        continue
+                        x_values.append(x[0])
                     elif pos == "micro":
                         rel_width = 1 / float(10000)
                     elif pos == "tiny":
@@ -451,12 +446,7 @@ class Factory(object):
                         rel_width = 1 / float(100)
                     elif pos == "big":
                         rel_width = 1 / float(50)
-                    x_values += (
-                        x[0] - (x_max * rel_width),
-                        x[0],
-                        x[0] + (x_max * rel_width),
-                        None,
-                    )
+                    x_values.append(x[0])
 
             elif style[0] == "lines":
                 mode = "lines"
@@ -483,37 +473,75 @@ class Factory(object):
                 """
             )
 
+        # breakpoint()
         trace = go.Scatter(
-            {
-                "x": x_values,
-                "y": y_values,
-                "text": txt,
-                "textfont": {"family": "Helvetica", "size": 10, "color": "#000000"},
-                "textposition": "top center",
-                "visible": True,
-                "marker": {
-                    "size": 10,
-                    "color": "rgba({0},{1},{2},{3})".format(
-                        color[0], color[1], color[2], opacity
-                    ),
-                },
-                "mode": mode,
-                "name": name,
-                "line": {
-                    "color": "rgba({0},{1},{2},{3})".format(
-                        color[0], color[1], color[2], opacity
-                    ),
-                    "width": self.style_options["line.width"],
-                    "shape": shape,
-                    "dash": dash,
-                },
-                "fill": filling,
-                "fillcolor": "rgba({0},{1},{2},{3})".format(
+            x=x_values,
+            y=y_values,
+            mode=mode,
+            marker={
+                "size": 10,
+                "color": "rgba({0},{1},{2},{3})".format(
                     color[0], color[1], color[2], opacity
                 ),
-                "opacity": opacity,
-            }
+            },
+            error_y={
+                'type': 'data',
+                'symmetric': False,
+                'arrayminus': y_values,
+                'visible': True,
+                'thickness': 1,
+                'width': 1,
+            },
+            text=txt,
+            textfont={"family": "Helvetica", "size": 10, "color": "#000000"},
+            textposition="top center",
+            visible=True,
+            name=name,
+            line={
+                "color": "rgba({0},{1},{2},{3})".format(
+                    color[0], color[1], color[2], opacity
+                ),
+                "width": self.style_options["line.width"],
+                "shape": shape,
+                "dash": dash,
+            },
+            fill=filling,
+            fillcolor="rgba({0},{1},{2},{3})".format(
+                color[0], color[1], color[2], opacity
+            ),
+            opacity=opacity,
         )
+        # trace = go.Scatter(
+        #     {
+        #         "x": x_values,
+        #         "y": y_values,
+        #         "text": txt,
+        #         "textfont": {"family": "Helvetica", "size": 10, "color": "#000000"},
+        #         "textposition": "top center",
+        #         "visible": True,
+        #         "marker": {
+        #             "size": 10,
+        #             "color": "rgba({0},{1},{2},{3})".format(
+        #                 color[0], color[1], color[2], opacity
+        #             ),
+        #         },
+        #         "mode": mode,
+        #         "name": name,
+        #         "line": {
+        #             "color": "rgba({0},{1},{2},{3})".format(
+        #                 color[0], color[1], color[2], opacity
+        #             ),
+        #             "width": self.style_options["line.width"],
+        #             "shape": shape,
+        #             "dash": dash,
+        #         },
+        #         "fill": filling,
+        #         "fillcolor": "rgba({0},{1},{2},{3})".format(
+        #             color[0], color[1], color[2], opacity
+        #         ),
+        #         "opacity": opacity,
+        #     }
+        # )
 
         self.plots[plot_num].append(trace)
         return trace

@@ -181,7 +181,7 @@ class PlotTest(unittest.TestCase):
                     plot_num=plotnumber,
                     mz_range=mz_range,
                 )
-            self.pf.save('test.html')
+            self.pf.save(self.file_name)
             # breakpoint()
 
             # self.assertEqual(
@@ -214,6 +214,21 @@ class PlotTest(unittest.TestCase):
         )
         self.pf.save(filename=self.file_name, layout=self.layout)
         self.assertTrue(os.path.exists(self.file_name))
+
+    def test_simple_anno(self):
+        self.pf.add(
+            self.spec.peaks('centroided'),
+            style='sticks',
+        )
+        # breakpoint()
+        anno = [
+            (tup[0], tup[1], 'TEST_{0}'.format(count)) for count, tup in enumerate(self.spec.highest_peaks(10))
+        ]
+        self.pf.add(
+            anno,
+            style='label.sticks'
+        )
+        self.pf.save(self.file_name)
 
     def tearDown(self):
         if os.path.exists(self.file_name):

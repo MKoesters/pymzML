@@ -482,7 +482,7 @@ class Factory(object):
                 -> triangle
                 """
             )
-        if not style[0] == "sticks":
+        if 'sticks' not in style:
             trace = go.Scatter(
                 {
                     "x": x_values,
@@ -515,6 +515,8 @@ class Factory(object):
                 }
             )
         else:
+            if style[0] == 'label':
+                mode = 'text'
             trace = go.Scatter(
                 x=x_values,
                 y=y_values,

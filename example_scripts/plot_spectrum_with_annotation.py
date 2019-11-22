@@ -78,10 +78,10 @@ def main():
     # peak fits into defined the mass accuracy range.
     precursor_mz_calc = 435.9102
     p.add(
-        [(precursor_mz_calc, "max_intensity", "theoretical precursor")],
+        [(precursor_mz_calc, 1.5*1e6, "theoretical precursor")],
         color=(255, 0, 0),
-        opacity=0.6,
-        style="label.triangle.MS_precision",
+        opacity=1.0,
+        style="label.sticks",
         name="theoretical precursor plot 1",
     )
 
@@ -108,7 +108,7 @@ def main():
         color=(255, 0, 0),
         opacity=0.3,
         plot_num=1,
-        style="label.triangle.MS_precision",
+        style="label.sticks",
         name="theoretical precursor plot 2",
     )
 
@@ -194,7 +194,7 @@ def main():
         p.add(
             label_list,
             color=color,
-            style="label.triangle.MS_precision",
+            style="label.sticks",
             name="theoretical fragment ions plot 3",
         )
 
